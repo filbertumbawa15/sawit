@@ -1,0 +1,51 @@
+name: sawit
+description: "A new Flutter project."
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.3.1 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  flutter_native_splash: ^2.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - 'assets/images/palm_background.jpg'
+    - 'assets/images/aal_logo.png'
+  fonts:
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-Regular.ttf
+        - asset: assets/fonts/Nunito-Italic.ttf
+          style: italic
+        - asset: assets/fonts/Nunito-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Nunito-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Nunito-ExtraBold.ttf
+          weight: 800
+
+flutter_native_splash:
+  # The background color of your splash screen.
+  # Hex color codes are recommended.
+  color: "#23B480" # This is white
+
+  # The image asset to show on the splash screen.
+  image: assets/images/logo-splash-screen.png
+
+  # To customize the splash screen for Android and iOS separately.
+  android_12:
+    # On Android 12+, the splash screen is a bit different.
+    # This sets the background color and image for the Android 12+ specific splash screen.
+    color: "#23B480"
+    image: assets/images/logo-splash-screen.png
