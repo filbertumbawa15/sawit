@@ -1,4 +1,9 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sawit/features/auth/presentation/bloc/auth_bloc.dart';
 
 class LoginPageScreen extends StatefulWidget {
   const LoginPageScreen({super.key});
@@ -10,38 +15,71 @@ class LoginPageScreen extends StatefulWidget {
 class _LoginPageScreenState extends State<LoginPageScreen> {
   // State to manage password visibility
   bool _isPasswordObscured = true;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<String> _getDeviceName() async {
+    final deviceInfo = DeviceInfoPlugin();
+    try {
+      if (Platform.isAndroid) {
+        final androidInfo = await deviceInfo.androidInfo;
+        return androidInfo.model;
+      } else if (Platform.isIOS) {
+        final iosInfo = await deviceInfo.iosInfo;
+        return iosInfo.utsname.machine;
+      }
+    } catch (e) {
+      return 'Unknown Device';
+    }
+    return 'Web/Desktop Device';
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Scaffold is the base for our page
     return Scaffold(
-      // We use a Stack to place the login form ON TOP of the background image
-      body: Stack(
-        fit: StackFit.expand, // Make the stack's children fill the screen
-        children: [
-          // 1. The Background Image
-          Image.asset(
-            'assets/images/palm_background.jpg',
-            fit: BoxFit.cover, // Cover the entire screen
-          ),
-
-          // 2. The Login Form
-          Center(
-            child: SingleChildScrollView(
-              // Prevents overflow when keyboard appears
-              padding: const EdgeInsets.all(10.0),
-              child: _buildLoginForm(),
-            ),
-          ),
-        ],
+      body: BlocConsumer<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is AuthSuccess) {
+            Navigator.pushReplacementNamed(context, '/home');
+          } else if (state is AuthError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset(
+                'assets/images/palm_background.jpg',
+                fit: BoxFit.cover,
+              ),
+              Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(10.0),
+                  child: _buildLoginForm(state),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  // Extracted the form into a separate method for clarity
-  Widget _buildLoginForm() {
+  Widget _buildLoginForm(AuthState state) {
     return Container(
-      // This is the white card
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -69,6 +107,7 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
           ),
           const SizedBox(height: 8),
           TextField(
+            controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               border: OutlineInputBorder(
@@ -87,9 +126,9 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
           ),
           const SizedBox(height: 8),
 
-          // Password TextField
           TextField(
-            obscureText: _isPasswordObscured, // Use state variable here
+            controller: _passwordController,
+            obscureText: _isPasswordObscured,
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
@@ -114,9 +153,31 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
 
           // Login Button
           ElevatedButton(
-            onPressed: () {
-              // Handle login logic here
-            },
+            onPressed: state is AuthLoading
+                ? null
+                : () async {
+                    final email = _emailController.text;
+                    final password = _passwordController.text;
+
+                    // Validasi sederhana
+                    if (email.isEmpty || password.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Email dan Password harus diisi!')),
+                      );
+                      return;
+                    }
+
+                    // Ambil Device ID
+                    final deviceName = await _getDeviceName();
+
+                    // Trigger (Tembak) Event BLoC
+                    if (context.mounted) {
+                      context.read<AuthBloc>().add(
+                            LoginRequested(email, password, deviceName),
+                          );
+                    }
+                  },
             style: ElevatedButton.styleFrom(
               backgroundColor:
                   const Color(0xFF16A55C), // The specific green color
@@ -125,10 +186,19 @@ class _LoginPageScreenState extends State<LoginPageScreen> {
                 borderRadius: BorderRadius.circular(8.0),
               ),
             ),
-            child: const Text(
-              'Login',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: state is AuthLoading
+                ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2.5,
+                    ),
+                  )
+                : const Text(
+                    'Login',
+                    style: TextStyle(color: Colors.white),
+                  ),
           ),
         ],
       ),
