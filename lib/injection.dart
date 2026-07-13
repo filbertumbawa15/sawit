@@ -1,7 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sawit/features/kontrol_operasional/data/datasources/kontrol_operasional_data_source.dart';
-import 'package:sawit/features/kontrol_operasional/presentation/bloc/kontroloperasional_bloc.dart';
+import 'package:sawit/features/kontrol_operasional/presentation/bloc/form_master/form_master_bloc.dart';
+import 'package:sawit/features/kontrol_operasional/presentation/bloc/kontroloperasional/kontroloperasional_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'features/auth/data/datasources/auth_data_source.dart';
@@ -16,7 +17,7 @@ Future<void> init() async {
 
   sl.registerLazySingleton(() {
     final options = BaseOptions(
-      baseUrl: 'http://10.0.2.2:8050',
+      baseUrl: 'https://sawit.filbertumbawa.site',
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       headers: {
@@ -57,4 +58,6 @@ Future<void> init() async {
       () => KontrolOperasionalDataSource(dio: sl()));
 
   sl.registerFactory(() => KontrolOperasionalBloc(dataSource: sl()));
+
+  sl.registerFactory(() => FormMasterBloc(dataSource: sl()));
 }

@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:sawit/features/kontrol_operasional/data/datasources/kontrol_operasional_data_source.dart';
+import 'package:sawit/features/kontrol_operasional/data/models/kontrol_operasional_model.dart';
 
 part 'kontroloperasional_event.dart';
 part 'kontroloperasional_state.dart';

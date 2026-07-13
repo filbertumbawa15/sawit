@@ -8,7 +8,7 @@ class KontrolOperasionalLoading extends KontrolOperasionalState {}
 
 class KontrolOperasionalLoaded extends KontrolOperasionalState {
   // State ini akan membawa array JSON dari backend ke UI
-  final List<dynamic> data;
+  final List<KontrolOperasionalModel> data;
   
   KontrolOperasionalLoaded(this.data);
 }
